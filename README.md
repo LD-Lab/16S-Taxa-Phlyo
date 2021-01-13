@@ -12,6 +12,11 @@ For basic usage of the sever, please refer to [LD Lab BioInfo Wiki](https://gith
 
 You can simply setup the conda env by installing these packages:
 ```conda install pandas biopython fastp blast```.
+Name                    Version
+pandas                    1.2.0
+biopython                 1.78
+fastp                     0.20.1
+blast                     2.10.1
 
 ### Data 
 
@@ -50,6 +55,6 @@ conda activate /home/LDlab/BioSoft/anaconda3/envs/qiime2-2019.4
 cd ~/16S-Taxa-Phlyo
 /home/LDlab/BioSoft/Scripts/16S-Taxa-Phlyo/16S-Taxa-Phylo.sh ./S200904-020-371-1 ./Result
 ```
-The phlyo result is saved as ```taxonomy.tsv``` the evolutionary tree is saved as ```tree.nwk```.
+
 
 

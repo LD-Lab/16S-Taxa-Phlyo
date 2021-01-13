@@ -92,24 +92,20 @@ def ABI2FastqParallel(abiList, fastqList):
 
 ## Fastp pair end tirmming and merging
 def RunFastp(R1, R2, prefix, OutDir):
-    trimDir = os.path.join(OutDir, "trim")
     mergeDir = os.path.join(OutDir, "merge")
     fastpDir = os.path.join(OutDir, "fastp")
-    unmergeDir = os.path.join(OutDir, "unmerge")
+    unmergeDir = os.path.join(OutDir, "unmerge", "fastq")
     if os.path.exists(OutDir) == 0:
         os.makedirs(OutDir, 0o777, True)
-    if os.path.exists(trimDir) == 0:
-        os.makedirs(trimDir, 0o777, True)
     if os.path.exists(mergeDir) == 0:
         os.makedirs(mergeDir, 0o777, True)
     if os.path.exists(fastpDir) == 0:
         os.makedirs(fastpDir, 0o777, True)
     if os.path.exists(unmergeDir) == 0:
-        os.makedirs(unmergeDir, 0o777, True)        
-    cmd = "fastp -i " + R1 + " -I " + R2 + " -o " + os.path.join(trimDir, prefix + "_trim_R1.fastq") + " -O " + os.path.join(trimDir, prefix + "_trim_R2.fastq") + \
+        os.makedirs(unmergeDir, 0o777, True)
+    cmd = "fastp -i " + R1 + " -I " + R2 + " -o " + os.path.join(unmergeDir, prefix + "_R1.fastq") + " -O " + os.path.join(unmergeDir, prefix + "_R2.fastq") + \
     " --trim_front1 30 --max_len1 750 --trim_front2 30 --max_len2 750 --cut_front --cut_tail --cut_window_size 20 --cut_mean_quality 30" + \
     " --merge --merged_out " + os.path.join(mergeDir, prefix + ".fastq") + " --correction --overlap_len_require 20 " + \
-    " --unpaired1 " + os.path.join(unmergeDir, prefix + "_R1.fastq") + " --unpaired2 " + os.path.join(unmergeDir, prefix + "_R2.fastq") + \
     " --html " + os.path.join(fastpDir, prefix + ".html") + " --json " + os.path.join(fastpDir, prefix + ".json") + " --report_title " + prefix + "-fastq-merge-report"
     subprocess.call(cmd, shell=True)
 def RunFastpParallel(R1List, R2List, prefixList, OutDir):
@@ -183,6 +179,26 @@ def parseFastqSingle(InDir, OutDir):
     SeqIO.write(allSeq, os.path.join(OutDir, "single.fasta"), "fasta")
     return fastaFileList
 
+## Parse unmerge fastq
+def parseFastqUnmerge(filePath, OutDir):
+    allSeq = []
+    fastaFileList = []
+    fastaDir = os.path.join(OutDir, "fasta")
+    if os.path.exists(fastaDir) == 0:
+        os.makedirs(fastaDir, 0o777, True)
+    for file in filePath:
+        for seq in SeqIO.parse(file, "fastq"):
+            seq.id = os.path.split(file)[1].replace(".fastq", "")
+            seq.name = ""
+            seq.description = ""
+            if "_R2" in seq.id:
+                seq.seq = seq.seq.reverse_complement()
+            allSeq.append(seq)
+            fastaFile = os.path.join(fastaDir, os.path.split(file)[1].replace(".fastq", ".fasta"))
+            fastaFileList.append(fastaFile)
+            SeqIO.write(seq, fastaFile, "fasta")
+    SeqIO.write(allSeq, os.path.join(OutDir, "unmerge.fasta"), "fasta")
+    return fastaFileList
 
 
 def RunBlastnParallel(fastaList, db, jobs, threads, OutDir):
@@ -250,6 +266,7 @@ singleOutDir = os.path.join(OutDir, "single")
 if os.path.exists(singleOutDir) == 0:
     os.makedirs(singleOutDir, 0o777, True)
 
+
 single, pairs = manifestGen(InDir, OutDir)
 
 pairs.to_csv(os.path.join(OutDir, "pairsTable.csv"))
@@ -267,6 +284,7 @@ RunBlastnParallel(fastaFileList, db, jobs, threads, OutDir)
 pairsOut = parseIndex(os.path.join(OutDir, "blast"), OutDir)
 pairsOut.to_csv(os.path.join(OutDir, "pairsOut.csv"))
 
+# Single
 if len(single) > 0:
     singleList = [item for sublist in list(single.values()) for item in sublist]
     single_q_List = parseSingle(single, singleOutDir)
@@ -277,5 +295,23 @@ if len(single) > 0:
     singleOut = parseIndex(os.path.join(singleOutDir, "blast"), singleOutDir)
     singleOut.to_csv(os.path.join(OutDir, "singleOut.csv"))
     pairsOut = pairsOut.append(singleOut)
+
+# Unmerge
+unmergeOutDir = os.path.join(OutDir, "unmerge")
+unmergeFastqDir = os.path.join(unmergeOutDir, "fastq")
+if os.path.exists(unmergeOutDir) == 0:
+    os.makedirs(unmergeOutDir, 0o777, True)
+
+unmergeList = []
+for file in os.listdir(unmergeFastqDir):
+    filePath = os.path.join(unmergeFastqDir, file)
+    if file.endswith(".fastq") and os.path.getsize(filePath) > 0:
+        unmergeList.append(filePath)
+if len(unmergeList) > 0:
+    fastaFileList = parseFastqUnmerge(unmergeList, unmergeOutDir)
+    RunBlastnParallel(fastaFileList, db, jobs, threads, unmergeOutDir)
+    unmergeOut = parseIndex(os.path.join(unmergeOutDir, "blast"), unmergeOutDir)
+    unmergeOut.to_csv(os.path.join(OutDir, "unmergeOut.csv"))
+    pairsOut = pairsOut.append(unmergeOut)
 
 pairsOut.to_csv(os.path.join(OutDir, "finalOut.csv"))
