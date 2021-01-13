@@ -110,7 +110,7 @@ def RunFastp(R1, R2, prefix, OutDir):
     " --trim_front1 30 --max_len1 750 --trim_front2 30 --max_len2 750 --cut_front --cut_tail --cut_window_size 20 --cut_mean_quality 30" + \
     " --merge --merged_out " + os.path.join(mergeDir, prefix + ".fastq") + " --correction --overlap_len_require 20 " + \
     " --unpaired1 " + os.path.join(unmergeDir, prefix + "_R1.fastq") + " --unpaired2 " + os.path.join(unmergeDir, prefix + "_R2.fastq") + \
-    " --html " + os.path.join(fastpDir, prefix + ".html") + " --report_title " + prefix + "-fastq-merge-report"
+    " --html " + os.path.join(fastpDir, prefix + ".html") + " --json " + os.path.join(fastpDir, prefix + ".json") + " --report_title " + prefix + "-fastq-merge-report"
     subprocess.call(cmd, shell=True)
 def RunFastpParallel(R1List, R2List, prefixList, OutDir):
     pool = Pool(processes = 4)
@@ -132,7 +132,7 @@ def RunFastpSingle(single, OutDir):
         os.makedirs(fastpDir, 0o777, True)        
     cmd = "fastp -i " + single + " -o " + os.path.join(trimDir, prefix + ".fastq")  + \
     " --trim_front1 30 --cut_front --cut_tail --cut_window_size 20 --cut_mean_quality 30" + \
-    " --html " + os.path.join(fastpDir, prefix + ".html") + " --report_title " + prefix + "-fastq-merge-report"
+    " --html " + os.path.join(fastpDir, prefix + ".html") + " --json " + os.path.join(fastpDir, prefix + ".json") + " --report_title " + prefix + "-fastq-merge-report"
     subprocess.call(cmd, shell=True)
 def RunFastpSingleParallel(singleList, OutDir):
     pool = Pool(processes = 4)
@@ -276,6 +276,6 @@ if len(single) > 0:
     RunBlastnParallel(fastaFileList, db, jobs, threads, singleOutDir)
     singleOut = parseIndex(os.path.join(singleOutDir, "blast"), singleOutDir)
     singleOut.to_csv(os.path.join(OutDir, "singleOut.csv"))
+    pairsOut = pairsOut.append(singleOut)
 
-pairsOut = pairsOut.append(singleOut)
 pairsOut.to_csv(os.path.join(OutDir, "finalOut.csv"))

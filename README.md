@@ -10,7 +10,8 @@ This pipeline utilize the feature of QIIME 2
 
 For basic usage of the sever, please refer to [LD Lab BioInfo Wiki](https://github.com/LD-Lab/LD-Lab-BioInfo-Wiki).
 
-```QIIME2``` environment is already set up at ```/home/LDlab/BioSoft/anaconda3/envs/qiime2-2019.4```.
+You can simply setup the conda env by installing these packages:
+```conda install pandas biopython fastp blast```.
 
 ### Data 
 
@@ -51,33 +52,4 @@ cd ~/16S-Taxa-Phlyo
 ```
 The phlyo result is saved as ```taxonomy.tsv``` the evolutionary tree is saved as ```tree.nwk```.
 
-#### Step by step processing
-
-You can also process the data step by step follows below.
-
-#### Step 1: QC Trimming
-
-```bash
-conda activate /home/LDlab/BioSoft/anaconda3/envs/qiime2-2019.4 
-python /home/LDlab/BioSoft/Scripts/16S-Taxa-Phlyo/seq_quality_trimming.py 
-    -i ./S200904-020-371-1 
-    -o ./Result
-```
-
-#### Step 2: Pair-end Merge
-
-```bash
-python /home/LDlab/BioSoft/Scripts/16S-Taxa-Phlyo/processing-merged-seq.py ./Result/merged_seqs.fasta
-```
-
-#### Step 3: QIIME2 taxa classifier
-
-If you want to classify the strain by 16S sequence, replace the ```.fasta``` as the input file ```-i *.fasta``` below.
-
-```bash
-python /home/LDlab/BioSoft/Scripts/16S-Taxa-Phlyo/16S-Taxa-Phylo-Pipeline.py 
-    -i ./Result/mergedSeq_clean.fasta 
-    -o ./Result
-```
-You can also use ```-r reference_reads.qza -t reference_taxonomy.qza``` to specify the database you want to use.
 
