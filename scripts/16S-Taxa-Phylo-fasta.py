@@ -228,9 +228,9 @@ parser.add_argument('-i', '--input', dest='InDir', type=str, required=True,
                     help="the path of the reads")
 parser.add_argument('-o', '--output', dest='OutDir', type=str, required=True,
                     help="the output path of reads")
-parser.add_argument('-d', '--database', dest='database', type=str,  required=False, default="/mnt/d/Lab/16S-Taxa-Phlyo/database/SILVA_138.1_SSURef_NR99_tax_silva.fasta",
+parser.add_argument('-d', '--database', dest='database', type=str,  required=False, default="~/16S-Taxa-Phlyo/Database/SILVA_138.1_SSURef_NR99_tax_silva.fasta",
                     help="the reference_reads path")
-parser.add_argument('-r', '--index', dest='index', type=str,  required=False, default="/mnt/d/Lab/16S-Taxa-Phlyo/database/silva-138-99-index.tsv",
+parser.add_argument('-r', '--index', dest='index', type=str,  required=False, default="~/16S-Taxa-Phlyo/Database/silva-138-99-index.tsv",
                     help="the reference_taxonomy path")
 parser.add_argument('-j', '--jobs', dest='jobs', type=str,  required=False, default='2',
                     help="the number of jobs run in parallel")

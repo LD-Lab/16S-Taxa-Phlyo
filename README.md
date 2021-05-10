@@ -11,6 +11,9 @@ This pipeline utilize the feature of QIIME 2
 For basic usage of the sever, please refer to [LD Lab BioInfo Wiki](https://github.com/LD-Lab/LD-Lab-BioInfo-Wiki).
 
 You can simply setup the conda env by installing these packages:
+
+```conda env create -n AssignTaxa -f ./environment.yml```
+
 ```conda install pandas biopython fastp blast```.
 Name                    Version
 pandas                    1.2.0
@@ -35,12 +38,14 @@ All the files should have the same and uniqe ```StrainName``` as the prefixion. 
 All sequence results can be put in one ```path```. For example,
 
 ```bash
-~/16S-Taxa-Phlyo/S200904-020-371-1
+~/16S-Taxa-Phlyo/test_data
 ```
 
 ### Database
 
-The database ```SILVA 16S NR99 Ref DB``` are saved at ```/home/LDlab/DataBases/TaxaIdentification/classifier```. The database is downloaded from [QIIME2 Doc](https://docs.qiime2.org/2020.8/data-resources/#silva-16s-18s-rrna) as [Silva 138 SSURef NR99 full-length sequences](https://data.qiime2.org/2020.8/common/silva-138-99-seqs.qza) and [Silva 138 SSURef NR99 full-length taxonomy](https://data.qiime2.org/2020.8/common/silva-138-99-tax.qza).
+The database ```SILVA 16S NR99 Ref``` can be download from [SILVA](https://www.arb-silva.de/) as [SILVA_138.1_SSURef_NR99_tax_silva](https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz).
+
+Run ```bash init.sh``` to download and initialize the database to ```./Database```.
 
 ### Pipeline
 
@@ -48,12 +53,11 @@ The one line command would give the ```taxonomy.tsv``` based on the sequencing r
 
 #### One line command
 
-The following command will save the result in ```~/16S-Taxa-Phlyo/result``` based on the sequencing result in ```~/16S-Taxa-Phlyo/S200904-020-371-1```.
+The following command will save the taxa assignment result in ```./test_out``` based on the sequences in ```./test_data```.
 
 ```bash
-conda activate /home/LDlab/BioSoft/anaconda3/envs/qiime2-2019.4
-cd ~/16S-Taxa-Phlyo
-/home/LDlab/BioSoft/Scripts/16S-Taxa-Phlyo/16S-Taxa-Phylo.sh ./S200904-020-371-1 ./Result
+conda activate AssignTaxa
+python ./scripts/16S-Taxa-Phylo-Pipeline.py -i ./test_data -o ./test_out
 ```
 
 
